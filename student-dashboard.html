@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>داشبورد الطالب</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #16a34a;
+    --green-light: #dcfce7;
+    --green-dark: #14532d;
+    --green-mid: #22c55e;
+    --bg: #f8fafc;
+    --white: #ffffff;
+    --gray: #f1f5f9;
+    --gray-2: #e2e8f0;
+    --gray-3: #94a3b8;
+    --text: #0f172a;
+    --text-2: #475569;
+    --red: #ef4444;
+    --red-light: #fee2e2;
+    --orange: #f97316;
+    --orange-light: #ffedd5;
+    --blue: #3b82f6;
+    --blue-light: #dbeafe;
+    --shadow: 0 2px 16px rgba(0,0,0,0.07);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.10);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+  /* TOP BAR */
+  .topbar {
+    background: var(--green);
+    color: white;
+    padding: 18px 20px 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(22,163,74,0.18);
+  }
+  .topbar-inner { display: flex; align-items: center; justify-content: space-between; max-width: 480px; margin: 0 auto; }
+  .topbar h1 { font-size: 1.15rem; font-weight: 700; }
+  .topbar .date { font-size: 0.8rem; opacity: 0.85; margin-top: 2px; }
+  .avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; font-weight: 700; color: white;
+    border: 2px solid rgba(255,255,255,0.5);
+  }
+  /* PAGES */
+  .page { display: none; max-width: 480px; margin: 0 auto; padding: 16px; }
+  .page.active { display: block; }
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: white;
+    border-top: 1px solid var(--gray-2);
+    display: flex;
+    z-index: 200;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    padding: 10px 4px 8px; cursor: pointer; border: none; background: none;
+    color: var(--gray-3); font-family: 'Cairo', sans-serif; font-size: 0.7rem;
+    transition: color 0.2s;
+    gap: 4px;
+  }
+  .nav-item.active { color: var(--green); }
+  .nav-item svg { width: 22px; height: 22px; }
+  /* CARDS */
+  .card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+  }
+  .card-title { font-size: 0.85rem; font-weight: 600; color: var(--text-2); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  /* HOME */
+  .hero-card {
+    background: linear-gradient(135deg, var(--green) 0%, #15803d 100%);
+    border-radius: var(--radius);
+    padding: 20px;
+    color: white;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 20px rgba(22,163,74,0.25);
+  }
+  .hero-name { font-size: 1.3rem; font-weight: 900; }
+  .hero-major { font-size: 0.85rem; opacity: 0.85; margin-bottom: 14px; }
+  .progress-label { font-size: 0.78rem; opacity: 0.85; margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .progress-bar { background: rgba(255,255,255,0.25); border-radius: 99px; height: 8px; overflow: hidden; }
+  .progress-fill { background: white; border-radius: 99px; height: 100%; transition: width 0.8s ease; }
+  .quick-links { display: flex; gap: 10px; margin-top: 14px; }
+  .quick-link {
+    flex: 1; background: rgba(255,255,255,0.15); border-radius: var(--radius-sm);
+    padding: 10px; text-align: center; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.2); text-decoration: none; color: white;
+    font-size: 0.78rem; font-family: 'Cairo', sans-serif; font-weight: 600;
+    transition: background 0.2s;
+  }
+  .quick-link:hover { background: rgba(255,255,255,0.25); }
+  .quick-link .ql-icon { font-size: 1.3rem; display: block; margin-bottom: 3px; }
+  /* SCHEDULE ITEM */
+  .schedule-item {
+    background: white; border-radius: var(--radius-sm);
+    padding: 14px; margin-bottom: 8px;
+    border-right: 4px solid var(--green);
+    box-shadow: var(--shadow);
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .schedule-item.section { border-right-color: var(--blue); }
+  .si-name { font-size: 0.95rem; font-weight: 700; }
+  .si-meta { font-size: 0.78rem; color: var(--text-2); margin-top: 3px; }
+  .si-badge {
+    font-size: 0.7rem; padding: 2px 8px; border-radius: 99px; font-weight: 600;
+    background: var(--green-light); color: var(--green);
+    white-space: nowrap; margin-bottom: 6px;
+  }
+  .si-badge.section { background: var(--blue-light); color: var(--blue); }
+  .si-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .btn-sm {
+    font-size: 0.72rem; padding: 4px 10px; border-radius: 99px;
+    border: 1px solid var(--gray-2); background: var(--gray);
+    cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 600;
+    color: var(--text-2); transition: all 0.15s;
+  }
+  .btn-sm:hover { background: var(--green-light); color: var(--green); border-color: var(--green); }
+  .btn-sm.attend { background: var(--green-light); color: var(--green); border-color: var(--green); }
+  /* MAIN BUTTON */
+  .btn-main {
+    background: var(--green); color: white; border: none;
+    border-radius: var(--radius-sm); padding: 12px 20px;
+    font-size: 0.9rem; font-weight: 700; font-family: 'Cairo', sans-serif;
+    cursor: pointer; width: 100%; margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(22,163,74,0.25);
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-main:hover { background: #15803d; }
+  .btn-main:active { transform: scale(0.98); }
+  /* DAYS NAV */
+  .days-nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px; scrollbar-width: none; }
+  .days-nav::-webkit-scrollbar { display: none; }
+  .day-btn {
+    flex-shrink: 0; padding: 8px 16px; border-radius: 99px;
+    border: 1.5px solid var(--gray-2); background: white;
+    cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 0.82rem;
+    font-weight: 600; color: var(--text-2); transition: all 0.2s;
+  }
+  .day-btn.active { background: var(--green); color: white; border-color: var(--green); }
+  /* TASKS */
+  .task-item {
+    background: white; border-radius: var(--radius-sm);
+    padding: 14px 14px 14px 14px; margin-bottom: 8px;
+    box-shadow: var(--shadow);
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .task-check {
+    width: 22px; height: 22px; border-radius: 6px;
+    border: 2px solid var(--gray-2); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 2px; transition: all 0.2s;
+    background: white;
+  }
+  .task-check.done { background: var(--green); border-color: var(--green); }
+  .task-check svg { display: none; }
+  .task-check.done svg { display: block; }
+  .task-title { font-size: 0.9rem; font-weight: 700; }
+  .task-title.done { text-decoration: line-through; color: var(--gray-3); }
+  .task-meta { font-size: 0.75rem; color: var(--text-2); margin-top: 2px; }
+  .task-meta .overdue { color: var(--red); font-weight: 600; }
+  .task-course-tag { font-size: 0.7rem; color: var(--green); font-weight: 600; }
+  .task-actions { margin-right: auto; }
+  .btn-del { background: none; border: none; cursor: pointer; color: var(--gray-3); padding: 4px; font-size: 1rem; transition: color 0.15s; }
+  .btn-del:hover { color: var(--red); }
+  /* RESOURCES */
+  .resource-item {
+    background: white; border-radius: var(--radius-sm);
+    padding: 14px; margin-bottom: 8px; box-shadow: var(--shadow);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .res-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+  }
+  .res-icon.whatsapp { background: #dcfce7; }
+  .res-icon.youtube { background: #fee2e2; }
+  .res-icon.website { background: var(--blue-light); }
+  .res-title { font-size: 0.88rem; font-weight: 700; }
+  .res-meta { font-size: 0.74rem; color: var(--text-2); margin-top: 2px; }
+  .res-actions { margin-right: auto; display: flex; gap: 6px; }
+  .btn-open {
+    background: var(--green-light); color: var(--green);
+    border: none; border-radius: 8px; padding: 6px 12px;
+    font-size: 0.75rem; font-weight: 700; font-family: 'Cairo', sans-serif;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .btn-open:hover { background: #bbf7d0; }
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    z-index: 500; display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: white; border-radius: 24px 24px 0 0;
+    padding: 24px 20px 32px; width: 100%; max-width: 480px;
+    transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-title { font-size: 1rem; font-weight: 700; margin-bottom: 16px; }
+  .form-group { margin-bottom: 12px; }
+  .form-group label { font-size: 0.82rem; font-weight: 600; color: var(--text-2); display: block; margin-bottom: 5px; }
+  .form-group input, .form-group select {
+    width: 100%; padding: 10px 12px; border: 1.5px solid var(--gray-2);
+    border-radius: var(--radius-sm); font-family: 'Cairo', sans-serif; font-size: 0.88rem;
+    color: var(--text); background: white; outline: none; transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--green); }
+  .modal-btns { display: flex; gap: 10px; margin-top: 16px; }
+  .btn-cancel {
+    flex: 1; padding: 12px; border: 1.5px solid var(--gray-2);
+    border-radius: var(--radius-sm); font-family: 'Cairo', sans-serif; font-size: 0.88rem;
+    font-weight: 700; cursor: pointer; background: white; color: var(--text-2); transition: all 0.15s;
+  }
+  .btn-cancel:hover { background: var(--gray); }
+  .btn-save {
+    flex: 2; padding: 12px; background: var(--green); color: white;
+    border: none; border-radius: var(--radius-sm);
+    font-family: 'Cairo', sans-serif; font-size: 0.88rem; font-weight: 700;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .btn-save:hover { background: #15803d; }
+  /* EMPTY STATE */
+  .empty { text-align: center; padding: 40px 20px; color: var(--gray-3); }
+  .empty .e-icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty p { font-size: 0.88rem; }
+  /* SECTION HEADER */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .section-header h2 { font-size: 0.95rem; font-weight: 700; }
+  .tag-badge {
+    font-size: 0.7rem; padding: 3px 10px; border-radius: 99px; font-weight: 700;
+  }
+  .tag-overdue { background: var(--red-light); color: var(--red); }
+  .tag-done { background: var(--green-light); color: var(--green); }
+  .tag-pending { background: var(--orange-light); color: var(--orange); }
+  /* PRAYER TIMES */
+  .prayer-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .prayer-item { text-align: center; }
+  .prayer-name { font-size: 0.7rem; color: var(--text-2); font-weight: 600; }
+  .prayer-time { font-size: 0.8rem; font-weight: 700; color: var(--green); margin-top: 2px; }
+  /* Attend animation */
+  @keyframes pop { 0%{transform:scale(1)} 50%{transform:scale(1.18)} 100%{transform:scale(1)} }
+  .pop { animation: pop 0.25s ease; }
+  /* FILTER TABS */
+  .filter-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+  .filter-tab {
+    padding: 6px 14px; border-radius: 99px; font-size: 0.78rem; font-weight: 700;
+    border: 1.5px solid var(--gray-2); background: white; cursor: pointer;
+    font-family: 'Cairo', sans-serif; color: var(--text-2); transition: all 0.15s;
+  }
+  .filter-tab.active { background: var(--green); color: white; border-color: var(--green); }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <div class="topbar h1" id="topbar-title" style="font-size:1.05rem;font-weight:700;">🎓 داشبورد الطالب</div>
+      <div class="date" id="today-date"></div>
+    </div>
+    <div class="avatar" id="avatar-init">ط</div>
+  </div>
+</div>
+
+<!-- PAGE: HOME -->
+<div class="page active" id="page-home">
+
+  <div class="hero-card">
+    <div class="hero-name" id="hero-name">أحمد محمد</div>
+    <div class="hero-major" id="hero-major">🏥 طب بشري - السنة الثالثة</div>
+    <div class="progress-label">
+      <span>نسبة الإنجاز الكلي</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="quick-links">
+      <a class="quick-link" id="ql-group" href="#" onclick="openLink('group')">
+        <span class="ql-icon">💬</span>جروب الدفعة
+      </a>
+      <a class="quick-link" id="ql-college" href="#" onclick="openLink('college')">
+        <span class="ql-icon">🏫</span>موقع الكلية
+      </a>
+    </div>
+  </div>
+
+  <!-- Prayer Times -->
+  <div class="card">
+    <div class="card-title">🕌 أوقات الصلاة</div>
+    <div class="prayer-grid" id="prayer-times">
+      <div class="prayer-item"><div class="prayer-name">الفجر</div><div class="prayer-time">4:35</div></div>
+      <div class="prayer-item"><div class="prayer-name">الظهر</div><div class="prayer-time">12:05</div></div>
+      <div class="prayer-item"><div class="prayer-name">العصر</div><div class="prayer-time">3:30</div></div>
+      <div class="prayer-item"><div class="prayer-name">المغرب</div><div class="prayer-time">6:12</div></div>
+      <div class="prayer-item"><div class="prayer-name">العشاء</div><div class="prayer-time">7:42</div></div>
+    </div>
+  </div>
+
+  <!-- Today's Schedule -->
+  <div class="card">
+    <div class="card-title">📅 جدول اليوم</div>
+    <div id="today-schedule"></div>
+  </div>
+
+</div>
+
+<!-- PAGE: SCHEDULE -->
+<div class="page" id="page-schedule">
+  <div class="days-nav" id="days-nav"></div>
+  <button class="btn-main" onclick="openModal('schedule')">+ إضافة محاضرة</button>
+  <div id="schedule-list"></div>
+</div>
+
+<!-- PAGE: RESOURCES -->
+<div class="page" id="page-resources">
+  <button class="btn-main" onclick="openModal('resource')">+ إضافة رابط</button>
+  <div id="resources-list"></div>
+</div>
+
+<!-- PAGE: TASKS -->
+<div class="page" id="page-tasks">
+  <button class="btn-main" onclick="openModal('task')">+ إضافة مهمة</button>
+  <div class="filter-tabs">
+    <button class="filter-tab active" onclick="filterTasks('all', this)">الكل</button>
+    <button class="filter-tab" onclick="filterTasks('pending', this)">قيد التنفيذ</button>
+    <button class="filter-tab" onclick="filterTasks('done', this)">مكتملة</button>
+    <button class="filter-tab" onclick="filterTasks('overdue', this)">متأخرة</button>
+  </div>
+  <div id="tasks-list"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="goPage('home',this)">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+    الرئيسية
+  </button>
+  <button class="nav-item" onclick="goPage('schedule',this)">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+    الجدول
+  </button>
+  <button class="nav-item" onclick="goPage('tasks',this)">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+    المهام
+  </button>
+  <button class="nav-item" onclick="goPage('resources',this)">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+    الروابط
+  </button>
+</nav>
+
+<!-- MODAL: SCHEDULE -->
+<div class="modal-overlay" id="modal-schedule">
+  <div class="modal">
+    <div class="modal-title">📚 إضافة محاضرة</div>
+    <div class="form-group"><label>اسم المادة</label><input id="sc-name" placeholder="مثال: فيزيولوجي" /></div>
+    <div class="form-group"><label>النوع</label>
+      <select id="sc-type"><option value="lecture">محاضرة</option><option value="section">سكشن</option></select>
+    </div>
+    <div class="form-group"><label>اليوم</label>
+      <select id="sc-day">
+        <option value="0">السبت</option><option value="1">الأحد</option>
+        <option value="2">الاثنين</option><option value="3">الثلاثاء</option>
+        <option value="4">الأربعاء</option><option value="5">الخميس</option>
+      </select>
+    </div>
+    <div class="form-group"><label>الوقت</label><input id="sc-time" type="time" value="09:00" /></div>
+    <div class="form-group"><label>المكان</label><input id="sc-place" placeholder="مثال: قاعة A1" /></div>
+    <div class="form-group"><label>الدكتور</label><input id="sc-doc" placeholder="مثال: د. أحمد علي" /></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('schedule')">إلغاء</button>
+      <button class="btn-save" onclick="saveSchedule()">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: TASK -->
+<div class="modal-overlay" id="modal-task">
+  <div class="modal">
+    <div class="modal-title">✅ إضافة مهمة</div>
+    <div class="form-group"><label>عنوان المهمة</label><input id="tk-title" placeholder="مثال: حل تمارين الكيمياء" /></div>
+    <div class="form-group"><label>المادة (اختياري)</label><input id="tk-course" placeholder="مثال: كيمياء" /></div>
+    <div class="form-group"><label>تاريخ التسليم</label><input id="tk-due" type="date" /></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('task')">إلغاء</button>
+      <button class="btn-save" onclick="saveTask()">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: RESOURCE -->
+<div class="modal-overlay" id="modal-resource">
+  <div class="modal">
+    <div class="modal-title">🔗 إضافة رابط</div>
+    <div class="form-group"><label>العنوان</label><input id="rs-title" placeholder="مثال: محاضرات الكيمياء" /></div>
+    <div class="form-group"><label>النوع</label>
+      <select id="rs-type">
+        <option value="whatsapp">واتساب 💬</option>
+        <option value="youtube">يوتيوب ▶️</option>
+        <option value="website">موقع 🌐</option>
+      </select>
+    </div>
+    <div class="form-group"><label>الرابط</label><input id="rs-url" placeholder="https://..." /></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('resource')">إلغاء</button>
+      <button class="btn-save" onclick="saveResource()">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== DATA =====================
+const DAYS = ['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
+// JS getDay: 0=Sun,1=Mon,...,6=Sat → map to our 0=Sat index
+const JS_TO_APP_DAY = [1,2,3,4,5,6,0]; // Sun→1(Ahad), Mon→2, Tue→3, Wed→4, Thu→5, Fri→6, Sat→0
+
+let profile = JSON.parse(localStorage.getItem('profile') || 'null') || {
+  name: 'أحمد محمد', major: 'طب بشري - السنة الثالثة', progress: 65,
+  groupLink: 'https://wa.me/', collegeLink: 'https://example.edu'
+};
+
+let schedule = JSON.parse(localStorage.getItem('schedule') || '[]');
+if (!schedule.length) {
+  schedule = [
+    {id:1,name:'فيزيولوجي',type:'lecture',day:0,time:'09:00',place:'قاعة A1',doctor:'د. محمد علي',attended:false},
+    {id:2,name:'كيمياء عضوية',type:'section',day:0,time:'11:00',place:'معمل 3',doctor:'د. سارة أحمد',attended:false},
+    {id:3,name:'أناتومي',type:'lecture',day:1,time:'08:00',place:'قاعة B2',doctor:'د. خالد محمود',attended:false},
+    {id:4,name:'بيوكيمستري',type:'lecture',day:2,time:'10:00',place:'قاعة A2',doctor:'د. نور حسن',attended:false},
+  ];
+  save('schedule');
+}
+
+let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+if (!tasks.length) {
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+  const nextWeek = new Date(); nextWeek.setDate(nextWeek.getDate()+7);
+  tasks = [
+    {id:1,title:'مراجعة محاضرات الفيزيولوجي',course:'فيزيولوجي',due:fmtDate(tomorrow),done:false},
+    {id:2,title:'حل تمارين الكيمياء',course:'كيمياء',due:fmtDate(yesterday),done:false},
+    {id:3,title:'تقرير الأناتومي',course:'أناتومي',due:fmtDate(nextWeek),done:true},
+  ];
+  save('tasks');
+}
+
+let resources = JSON.parse(localStorage.getItem('resources') || '[]');
+if (!resources.length) {
+  resources = [
+    {id:1,title:'جروب الدفعة',type:'whatsapp',url:'https://wa.me/',date:'2025-01-01'},
+    {id:2,title:'محاضرات الكيمياء',type:'youtube',url:'https://youtube.com/',date:'2025-01-05'},
+    {id:3,title:'موقع الكلية',type:'website',url:'https://example.edu',date:'2025-01-10'},
+  ];
+  save('resources');
+}
+
+let currentDay = JS_TO_APP_DAY[new Date().getDay()];
+let taskFilter = 'all';
+
+function fmtDate(d) { return d.toISOString().split('T')[0]; }
+function save(key) { localStorage.setItem(key, JSON.stringify(eval(key))); }
+function genId() { return Date.now(); }
+
+// ===================== INIT =====================
+function init() {
+  // Date
+  const now = new Date();
+  document.getElementById('today-date').textContent =
+    now.toLocaleDateString('ar-EG', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  // Profile
+  document.getElementById('hero-name').textContent = profile.name;
+  document.getElementById('hero-major').textContent = '🎓 ' + profile.major;
+  document.getElementById('avatar-init').textContent = profile.name[0];
+  document.getElementById('progress-pct').textContent = profile.progress + '%';
+  setTimeout(() => { document.getElementById('progress-fill').style.width = profile.progress + '%'; }, 200);
+
+  renderTodaySchedule();
+  renderDaysNav();
+  renderSchedule();
+  renderTasks();
+  renderResources();
+}
+
+// ===================== NAVIGATION =====================
+function goPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  btn.classList.add('active');
+  const titles = {home:'🎓 داشبورد الطالب',schedule:'📅 الجدول الدراسي',tasks:'✅ المهام',resources:'🔗 الروابط'};
+  document.getElementById('topbar-title').textContent = titles[name];
+}
+
+// ===================== MODALS =====================
+function openModal(name) {
+  document.getElementById('modal-'+name).classList.add('open');
+}
+function closeModal(name) {
+  document.getElementById('modal-'+name).classList.remove('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+// ===================== HOME / TODAY =====================
+function renderTodaySchedule() {
+  const todayApp = JS_TO_APP_DAY[new Date().getDay()];
+  const todayItems = schedule.filter(s => s.day == todayApp).sort((a,b) => a.time.localeCompare(b.time));
+  const el = document.getElementById('today-schedule');
+  if (!todayItems.length) {
+    el.innerHTML = '<div class="empty"><div class="e-icon">☀️</div><p>لا توجد محاضرات اليوم!</p></div>';
+    return;
+  }
+  el.innerHTML = todayItems.map(s => scheduleCard(s, true)).join('');
+}
+
+function scheduleCard(s, showActions=false) {
+  const cls = s.type === 'section' ? 'section' : '';
+  const badge = s.type === 'section' ? '<span class="si-badge section">سكشن</span>' : '<span class="si-badge">محاضرة</span>';
+  const actions = showActions ? `
+    <div class="si-actions">
+      <button class="btn-sm ${s.attended?'attend':''}" onclick="toggleAttend(${s.id})" id="att-${s.id}">
+        ${s.attended ? '✅ حاضر' : '📋 تسجيل حضور'}
+      </button>
+      <button class="btn-sm" onclick="alert('🎙️ تسجيل صوت قريبًا!')">🎙️ تسجيل</button>
+      <button class="btn-sm" onclick="alert('📷 تصوير قريبًا!')">📷 تصوير</button>
+    </div>` : `
+    <div class="si-actions">
+      <button class="btn-sm" onclick="deleteSchedule(${s.id})">🗑️ حذف</button>
+    </div>`;
+  return `
+    <div class="schedule-item ${cls}" id="si-${s.id}">
+      <div style="flex:1">
+        ${badge}
+        <div class="si-name">${s.name}</div>
+        <div class="si-meta">⏰ ${s.time} &nbsp;|&nbsp; 📍 ${s.place} &nbsp;|&nbsp; 👨‍🏫 ${s.doctor}</div>
+        ${actions}
+      </div>
+    </div>`;
+}
+
+function toggleAttend(id) {
+  const s = schedule.find(x => x.id == id);
+  if (!s) return;
+  s.attended = !s.attended;
+  save('schedule');
+  renderTodaySchedule();
+  updateProgress();
+}
+
+function openLink(type) {
+  const url = type === 'group' ? profile.groupLink : profile.collegeLink;
+  window.open(url, '_blank');
+  return false;
+}
+
+// ===================== SCHEDULE =====================
+function renderDaysNav() {
+  const nav = document.getElementById('days-nav');
+  nav.innerHTML = DAYS.map((d,i) => `
+    <button class="day-btn ${i==currentDay?'active':''}" onclick="selectDay(${i})">${d}</button>
+  `).join('');
+}
+
+function selectDay(i) {
+  currentDay = i;
+  renderDaysNav();
+  renderSchedule();
+}
+
+function renderSchedule() {
+  const items = schedule.filter(s => s.day == currentDay).sort((a,b) => a.time.localeCompare(b.time));
+  const el = document.getElementById('schedule-list');
+  if (!items.length) {
+    el.innerHTML = '<div class="empty"><div class="e-icon">📭</div><p>لا توجد محاضرات هذا اليوم</p></div>';
+    return;
+  }
+  el.innerHTML = items.map(s => scheduleCard(s, false)).join('');
+}
+
+function saveSchedule() {
+  const name = document.getElementById('sc-name').value.trim();
+  if (!name) { alert('ادخل اسم المادة'); return; }
+  const item = {
+    id: genId(),
+    name,
+    type: document.getElementById('sc-type').value,
+    day: parseInt(document.getElementById('sc-day').value),
+    time: document.getElementById('sc-time').value,
+    place: document.getElementById('sc-place').value.trim() || 'غير محدد',
+    doctor: document.getElementById('sc-doc').value.trim() || 'غير محدد',
+    attended: false
+  };
+  schedule.push(item);
+  save('schedule');
+  closeModal('schedule');
+  // reset
+  ['sc-name','sc-place','sc-doc'].forEach(id => document.getElementById(id).value='');
+  currentDay = item.day;
+  renderDaysNav();
+  renderSchedule();
+  renderTodaySchedule();
+}
+
+function deleteSchedule(id) {
+  if (!confirm('تأكيد الحذف؟')) return;
+  schedule = schedule.filter(s => s.id != id);
+  save('schedule');
+  renderSchedule();
+  renderTodaySchedule();
+}
+
+// ===================== TASKS =====================
+function filterTasks(f, btn) {
+  taskFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTasks();
+}
+
+function isOverdue(task) {
+  if (task.done) return false;
+  const due = new Date(task.due);
+  const today = new Date(); today.setHours(0,0,0,0);
+  return due < today;
+}
+
+function renderTasks() {
+  let items = [...tasks];
+  const today = new Date(); today.setHours(0,0,0,0);
+  // sort by due date
+  items.sort((a,b) => new Date(a.due) - new Date(b.due));
+  if (taskFilter === 'done') items = items.filter(t => t.done);
+  else if (taskFilter === 'pending') items = items.filter(t => !t.done && !isOverdue(t));
+  else if (taskFilter === 'overdue') items = items.filter(t => isOverdue(t));
+
+  const el = document.getElementById('tasks-list');
+  if (!items.length) {
+    el.innerHTML = '<div class="empty"><div class="e-icon">🎉</div><p>لا توجد مهام هنا</p></div>';
+    return;
+  }
+  el.innerHTML = items.map(t => {
+    const over = isOverdue(t);
+    const dueLabel = over ? `<span class="overdue">⚠️ متأخرة — ${t.due}</span>` : `📅 ${t.due}`;
+    const statusBadge = t.done ? '<span class="tag-badge tag-done">مكتملة</span>' :
+                        over ? '<span class="tag-badge tag-overdue">متأخرة</span>' :
+                               '<span class="tag-badge tag-pending">قيد التنفيذ</span>';
+    return `
+      <div class="task-item" id="tk-${t.id}">
+        <div class="task-check ${t.done?'done':''}" onclick="toggleTask(${t.id})">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="white"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        </div>
+        <div style="flex:1">
+          <div class="task-title ${t.done?'done':''}">${t.title}</div>
+          <div class="task-meta">
+            ${t.course ? `<span class="task-course-tag">📚 ${t.course}</span> &nbsp;` : ''}
+            ${dueLabel}
+          </div>
+          <div style="margin-top:5px">${statusBadge}</div>
+        </div>
+        <div class="task-actions">
+          <button class="btn-del" onclick="deleteTask(${t.id})">🗑️</button>
+        </div>
+      </div>`;
+  }).join('');
+  updateProgress();
+}
+
+function toggleTask(id) {
+  const t = tasks.find(x => x.id == id);
+  if (!t) return;
+  t.done = !t.done;
+  save('tasks');
+  renderTasks();
+}
+
+function deleteTask(id) {
+  tasks = tasks.filter(t => t.id != id);
+  save('tasks');
+  renderTasks();
+}
+
+function saveTask() {
+  const title = document.getElementById('tk-title').value.trim();
+  if (!title) { alert('ادخل عنوان المهمة'); return; }
+  const due = document.getElementById('tk-due').value;
+  if (!due) { alert('حدد تاريخ التسليم'); return; }
+  tasks.push({
+    id: genId(),
+    title,
+    course: document.getElementById('tk-course').value.trim(),
+    due,
+    done: false
+  });
+  save('tasks');
+  closeModal('task');
+  ['tk-title','tk-course','tk-due'].forEach(id => document.getElementById(id).value='');
+  renderTasks();
+}
+
+function updateProgress() {
+  if (!tasks.length) return;
+  const done = tasks.filter(t => t.done).length;
+  const pct = Math.round((done / tasks.length) * 100);
+  profile.progress = pct;
+  localStorage.setItem('profile', JSON.stringify(profile));
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+// ===================== RESOURCES =====================
+const TYPE_ICONS = { whatsapp:'💬', youtube:'▶️', website:'🌐' };
+const TYPE_LABELS = { whatsapp:'واتساب', youtube:'يوتيوب', website:'موقع' };
+
+function renderResources() {
+  const el = document.getElementById('resources-list');
+  if (!resources.length) {
+    el.innerHTML = '<div class="empty"><div class="e-icon">🔗</div><p>لا توجد روابط بعد</p></div>';
+    return;
+  }
+  el.innerHTML = resources.map(r => `
+    <div class="resource-item">
+      <div class="res-icon ${r.type}">${TYPE_ICONS[r.type]}</div>
+      <div style="flex:1">
+        <div class="res-title">${r.title}</div>
+        <div class="res-meta">${TYPE_LABELS[r.type]} &nbsp;|&nbsp; 📅 ${r.date}</div>
+      </div>
+      <div class="res-actions">
+        <button class="btn-open" onclick="window.open('${r.url}','_blank')">فتح</button>
+        <button class="btn-del" onclick="deleteResource(${r.id})">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function saveResource() {
+  const title = document.getElementById('rs-title').value.trim();
+  const url = document.getElementById('rs-url').value.trim();
+  if (!title || !url) { alert('ادخل العنوان والرابط'); return; }
+  resources.push({
+    id: genId(), title,
+    type: document.getElementById('rs-type').value,
+    url,
+    date: new Date().toISOString().split('T')[0]
+  });
+  save('resources');
+  closeModal('resource');
+  ['rs-title','rs-url'].forEach(id => document.getElementById(id).value='');
+  renderResources();
+}
+
+function deleteResource(id) {
+  if (!confirm('تأكيد الحذف؟')) return;
+  resources = resources.filter(r => r.id != id);
+  save('resources');
+  renderResources();
+}
+
+// ===================== START =====================
+init();
+</script>
+</body>
+</html>
